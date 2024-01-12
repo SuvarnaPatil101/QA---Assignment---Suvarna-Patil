@@ -1,0 +1,128 @@
+package TestPackage;	
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.Test;
+import static org.testng.AssertJUnit.assertTrue;
+import org.testng.annotations.BeforeMethod;
+import org.testng.AssertJUnit;
+import org.testng.Assert;
+import org.testng.AssertJUnit;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+	public class LoginAndRecoveryTest {
+
+	    private WebDriver driver;
+
+	    @BeforeMethod
+		public void setUp() {
+	        // Set the path to your ChromeDriver executable
+	        System.setProperty("webdriver.chrome.driver", "path/to/chromedriver");
+	        driver = new ChromeDriver();
+	        driver.get("URL_OF_YOUR_WEB_APPLICATION");
+	    }
+
+	    @AfterMethod
+		public void tearDown() {
+	        driver.quit();
+	    }
+
+	    @Test
+	    public void testValidLogin() {
+	        login("valid_username", "valid_password");
+	        AssertJUnit.assertTrue(isLoggedIn());
+	    }
+
+	    @Test
+	    public void testInvalidLogin() {
+	        login("invalid_username", "invalid_password");
+	        AssertJUnit.assertTrue(isErrorMessageDisplayed());
+	        AssertJUnit.assertEquals("invalid_username", getFieldValue("username"));
+	        AssertJUnit.assertEquals("invalid_password", getFieldValue("password"));
+	    }
+
+	    @Test
+	    public void testEmptyFields() {
+	        AssertJUnit.assertFalse(isLoginButtonEnabled());
+	    }
+
+	    @Test
+	    public void testFilledFields() {
+	        enterCredentials("valid_username", "valid_password");
+	        AssertJUnit.assertTrue(isLoginButtonEnabled());
+	    }
+
+	    @Test
+	    public void testForgotPasswordLink() {
+	        clickForgotPasswordLink();
+	        Assert.assertTrue("password_recovery" in driver.getCurrentUrl());
+	    }
+
+	    @Test
+	    public void testPasswordRecovery() {
+	        clickForgotPasswordLink();
+	        enterEmailForRecovery("user@example.com");
+	        clickRecoverPasswordButton();
+	        Assert.assertTrue(isRecoverySuccessMessageDisplayed());
+
+	        // After successfully resetting the password
+	        Assert.assertTrue("login" in driver.getCurrentUrl());
+	        login("valid_username", "new_password");
+	        Assert.assertTrue(isLoggedIn());
+	    }
+
+	    // Helper methods
+
+	    private void login(String username, String password) {
+	        enterCredentials(username, password);
+	        clickLoginButton();
+	    }
+
+	    private void enterCredentials(String username, String password) {
+	        driver.findElement(By.id("username")).sendKeys(username);
+	        driver.findElement(By.id("password")).sendKeys(password);
+	    }
+
+	    private void clickLoginButton() {
+	        driver.findElement(By.id("loginButton")).click();
+	    }
+
+	    private boolean isLoggedIn() {
+	        // Implement logic to check if user is logged in
+	        return driver.getCurrentUrl().contains("dashboard");
+	    }
+
+	    private boolean isErrorMessageDisplayed() {
+	        // Implement logic to check if error message is displayed
+	        return driver.getPageSource().contains("Invalid credentials");
+	    }
+
+	    private String getFieldValue(String fieldName) {
+	        return driver.findElement(By.id(fieldName)).getAttribute("value");
+	    }
+
+	    private boolean isLoginButtonEnabled() {
+	        return driver.findElement(By.id("loginButton")).isEnabled();
+	    }
+
+	    private void clickForgotPasswordLink() {
+	        driver.findElement(By.linkText("Forgot Password")).click();
+	    }
+
+	    private void enterEmailForRecovery(String email) {
+	        driver.findElement(By.id("recoveryEmail")).sendKeys(email);
+	    }
+
+	    private void clickRecoverPasswordButton() {
+	        driver.findElement(By.id("recoverButton")).click();
+	    }
+
+	    private boolean isRecoverySuccessMessageDisplayed() {
+	        // Implement logic to check if success message is displayed
+	        return driver.getPageSource().contains("Recovery instructions sent");
+	    }
+	}
+	
+
+
